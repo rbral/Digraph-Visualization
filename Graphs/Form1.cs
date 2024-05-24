@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SortedList;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -109,7 +110,7 @@ namespace Graphs
                 {
                     int srcVix = (int)dtEdges.Tables["Edges"].Rows[eix][1];
                     int tgtVix = (int)dtEdges.Tables["Edges"].Rows[eix][2];
-                    double wgt = dtEdges.Tables["Edges"].Rows[eix][3]== DBNull.Value
+                    double wgt = dtEdges.Tables["Edges"].Rows[eix][3] == DBNull.Value
                         ? 0.0
                         : (double)dtEdges.Tables["Edges"].Rows[eix][3];
                     if (vertices.ContainsKey(srcVix))
@@ -207,7 +208,7 @@ namespace Graphs
         }
 
         /*
-         *  ┎─┒  ┎─┒ ┎─┒
+         *  ┎-┒  ┎─┒ ┎─┒
          *  ┖─┚  ┖─┚ ┖─┚
          *     ╲ |  ╱
          *  ┎─┒━┎─┒━┎─┒
@@ -271,8 +272,22 @@ namespace Graphs
 
         private void kruskalsButton_Click(object sender, EventArgs e)
         {
+            List<Edge<String>> edgesToInclude = digraph.KruskalMSTEdges();
+            digraph = digraph.createDigraphFromEdges(digraph, edgesToInclude);
+            //Display(digraph);
 
+            //List<Edge<String>> mstEdges = digraph.KruskalMST();
+            //FormMST formMST = new FormMST(mstEdges, digraph);
+            //formMST.Show();
         }
-    }
 
+        // new class for MST form: 
+        
+
+
+
+    }
 }
+
+
+    

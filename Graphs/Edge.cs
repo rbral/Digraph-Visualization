@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace SortedList
+namespace Graphs
 {
     class Edge<T> : IComparable<Edge<T>> where T : IComparable<T>
     {
@@ -27,5 +27,8 @@ namespace SortedList
         {
             return this.Weight.CompareTo(other.Weight);
         }
+
+
+        
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SortedList;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -10,9 +11,14 @@ namespace Graphs
 {
     class Vertex<T> : IComparable<Vertex<T>> where T : IComparable<T>
     {
+        private T info;
+
         T Info { get; set; }
         public Label Image { get; set; }
         public SortedList<Vertex<T>, double> Neighbors { get; } 
+        // my addition:---------------
+        //public List<Edge<T>> Edges { get; }
+        //----------------------------
         int InDegree { get; set; }
         int OutDegree { get; set; }
 
@@ -24,7 +30,8 @@ namespace Graphs
             OutDegree = 0;
         }
 
-       
+        
+
         public override String ToString() => Info.ToString();
 
         //public  int CompareTo(Vertex<T> other)
