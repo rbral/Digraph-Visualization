@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TreeView;
 
@@ -67,8 +69,37 @@ namespace Graphs
         }
 
 
-        public Digraph<T> createDigraphFromEdges(Digraph<T> digraph, List<Edge<T>> edgesToIncludeList)
+        public Digraph<T> createDigraphFromEdges(Digraph<T> originalDigraph, List<Edge<T>> edgesToIncludeList)
         {
+            Digraph<T> newGraph = new Digraph<T>();
+            Dictionary<Vertex<T>, Vertex<T>> vertexMap = new Dictionary<Vertex<T>, Vertex<T>>();
+
+            // Add vertices to the new graph
+            foreach (var vertex in originalDigraph.Vertices)
+            {
+                var newVertex = new Vertex<T>(vertex.Info);
+                newGraph.AddVertex(newVertex);
+                vertexMap[vertex] = newVertex;
+            }
+
+            // Add edges to the new graph
+            foreach (var edge in edgesToIncludeList)
+            {
+                if (vertexMap.ContainsKey(edge.Source) && vertexMap.ContainsKey(edge.Target))
+                {
+                    var newSource = vertexMap[edge.Source];
+                    var newTarget = vertexMap[edge.Target];
+                    newSource.AddNeighbor(newTarget, edge.Weight);
+                }
+                else
+                {
+                    Console.WriteLine("Edge skipped: one of the vertices not found in the original graph.");
+                }
+            }
+
+            return newGraph;
+
+
             /*
              so we have a list of edges to include in drawing of mst.
             edges have: 
@@ -91,10 +122,11 @@ namespace Graphs
                     loop through neighbors list of vertex (correcponding to target in edge)
                     if find an edge that is          
              */
-            
-            Digraph<T> result = new Digraph<T>();
+
+            /*Digraph<T> result = new Digraph<T>();
             List<Vertex<T>> newVertices = result.Vertices;
             //List<Vertex<T>> NewVertices = new List<Vertex<T>>();
+
 
             Vertex<T> currSource;
             Vertex<T> currTarget;
@@ -109,111 +141,146 @@ namespace Graphs
                 newVertices.Add(currSource);                              
             }
 
-            return result;
+            return result;*/
         }
 
+        // new attempt chat gpt
+        // Kruskal's MST algorithm
         public List<Edge<T>> KruskalMSTEdges()
         {
-            // remove all the neighbors from the digraph
-            // that will not be included in the MST. 
-            // then call display on that digraph
-
-
-            // get number of Vertices and edges: 
-            int numV = Vertices.Count();
+            List<Edge<T>> resultEdges = new List<Edge<T>>();
             List<Edge<T>> edges = getEdges();
-            int numE = edges.Count();
+            edges.Sort();
 
-            // NEW: this will store the resultant mst:
-            //Digraph<T> result = new Digraph<T>();
-
-            // OLD:
-            // This will store the 
-            // resultant MST 
-            //EdgeG[] result = new EdgeG[numV];
-            List<Edge<T>> edgesToInclude = new List<Edge<T>>();
-
-            List<Edge<T>> edgesToExclude = new List<Edge<T>>();
-
-            // An index variable, used for result[] 
-            int e = 0;
-
-            // An index variable, used for sorted edges 
-            int i = 0;
-
-            // Sort all the edges in non-decreasing 
-            // order of their weight. 
-            edges.Sort((firstEdge, nextEdge) => firstEdge.Weight.CompareTo(nextEdge.Weight));
-
-            // Allocate memory for creating V subsets 
+            int numV = Vertices.Count;
             Subset[] subsets = new Subset[numV];
-            for (i = 0; i < numV; ++i)
-                subsets[i] = new Subset();
-
-            // Create V subsets with single elements 
             for (int v = 0; v < numV; ++v)
+                subsets[v] = new Subset { parent = v, rank = 0 };
+
+            int e = 0; // Number of edges in MST
+            int i = 0; // Index for sorted edges
+
+            while (e < numV - 1 && i < edges.Count)
             {
-                subsets[v].parent = v;
-                subsets[v].rank = 0;
-            }
-            i = 0;
-            int x, y;
-            // Number of edges to be taken is equal to V-1 
-            while (e < (numV - 1) && i < edges.Count)
-            {
-                foreach (Edge<T> edge in edges)
+                Edge<T> nextEdge = edges[i++];
+                int x = find(subsets, Vertices.IndexOf(nextEdge.Source));
+                int y = find(subsets, Vertices.IndexOf(nextEdge.Target));
+
+                if (x != y)
                 {
-                    x = find(subsets, Vertices.IndexOf(edge.Source));
-                    y = find(subsets, Vertices.IndexOf(edge.Target));
-                    if (x != y)
-                    {
-                        edgesToInclude.Add(edge);
-                        //edgesToInclude[e++] = next_edge;
-                        Union(subsets, x, y);
-                    }
-                    else
-                    {
-                        // remove this edge from the digraph
-                        // so add to edges to EXclude list:
-                        //edgesToExclude[e++] = next_edge;
-                        edgesToExclude.Add(edge);
-
-                    }
-                }
-                // Pick the smallest edge. And increment 
-                // the index for next iteration 
-                //EdgeG next_edge = new EdgeG();
-                //next_edge = edges[i++];
-                //Edge<T> next_edge = edges[i++];
-
-                // Convert Vertex to index (this may require a mapping from Vertex<T> to index)
-                //int x = find(subsets, Vertices.IndexOf(next_edge.Source));
-                //int y = find(subsets, Vertices.IndexOf(next_edge.Target));
-                //int x = find(subsets, next_edge.src);
-                //int y = find(subsets, next_edge.dest);
-
-                // If including this edge doesn't cause cycle, 
-                // include it in result and increment the index 
-                // of result for next edge 
-                /*if (x != y)
-                {
-                    edgesToInclude.Add(next_edge);
-                    //edgesToInclude[e++] = next_edge;
+                    resultEdges.Add(nextEdge);
                     Union(subsets, x, y);
+                    e++;
                 }
-                else
-                {
-                    // remove this edge from the digraph
-                    // so add to edges to EXclude list:
-                    //edgesToExclude[e++] = next_edge;
-                    edgesToExclude.Add(next_edge);
-
-                }*/
-
             }
-            return edgesToInclude;
+
+            return resultEdges;
         }
 
+
+        /*        public List<Edge<T>> KruskalMSTEdges()
+                {
+                    // remove all the neighbors from the digraph
+                    // that will not be included in the MST. 
+                    // then call display on that digraph
+
+
+                    // get number of Vertices and edges: 
+                    int numV = Vertices.Count();
+                    List<Edge<T>> edges = getEdges();
+                    int numE = edges.Count();
+
+                    // NEW: this will store the resultant mst:
+                    //Digraph<T> result = new Digraph<T>();
+
+                    // OLD:
+                    // This will store the 
+                    // resultant MST 
+                    //EdgeG[] result = new EdgeG[numV];
+                    List<Edge<T>> edgesToInclude = new List<Edge<T>>();
+
+                    List<Edge<T>> edgesToExclude = new List<Edge<T>>();
+
+                    // An index variable, used for result[] 
+                    int e = 0;
+
+                    // An index variable, used for sorted edges 
+                    int i = 0;
+
+                    // Sort all the edges in non-decreasing 
+                    // order of their weight. 
+                    edges.Sort((firstEdge, nextEdge) => firstEdge.Weight.CompareTo(nextEdge.Weight));
+
+                    // Allocate memory for creating V subsets 
+                    Subset[] subsets = new Subset[numV];
+                    for (i = 0; i < numV; ++i)
+                        subsets[i] = new Subset();
+
+                    // Create V subsets with single elements 
+                    for (int v = 0; v < numV; ++v)
+                    {
+                        subsets[v].parent = v;
+                        subsets[v].rank = 0;
+                    }
+                    i = 0;
+                    int x, y;
+                    // Number of edges to be taken is equal to V-1 
+                    while (e < (numV - 1) && i < edges.Count)
+                    {
+                        foreach (Edge<T> edge in edges)
+                        {
+                            x = find(subsets, Vertices.IndexOf(edge.Source));
+                            y = find(subsets, Vertices.IndexOf(edge.Target));
+                            if (x != y)
+                            {
+                                edgesToInclude.Add(edge);
+                                //edgesToInclude[e++] = next_edge;
+                                Union(subsets, x, y);
+                            }
+                            else
+                            {
+                                // remove this edge from the digraph
+                                // so add to edges to EXclude list:
+                                //edgesToExclude[e++] = next_edge;
+                                edgesToExclude.Add(edge);
+
+                            }
+                        }
+                        // Pick the smallest edge. And increment 
+                        // the index for next iteration 
+                        //EdgeG next_edge = new EdgeG();
+                        //next_edge = edges[i++];
+                        //Edge<T> next_edge = edges[i++];
+
+                        // Convert Vertex to index (this may require a mapping from Vertex<T> to index)
+                        //int x = find(subsets, Vertices.IndexOf(next_edge.Source));
+                        //int y = find(subsets, Vertices.IndexOf(next_edge.Target));
+                        //int x = find(subsets, next_edge.src);
+                        //int y = find(subsets, next_edge.dest);
+
+                        // If including this edge doesn't cause cycle, 
+                        // include it in result and increment the index 
+                        // of result for next edge 
+                        */
+        /*if (x != y)
+                        {
+                            edgesToInclude.Add(next_edge);
+                            //edgesToInclude[e++] = next_edge;
+                            Union(subsets, x, y);
+                        }
+                        else
+                        {
+                            // remove this edge from the digraph
+                            // so add to edges to EXclude list:
+                            //edgesToExclude[e++] = next_edge;
+                            edgesToExclude.Add(next_edge);
+
+                        }*//*
+
+                    }
+                    return edgesToInclude;
+                }
+        */
 
 
         // make a list of all edges:
@@ -283,6 +350,10 @@ namespace Graphs
 
             return sorted;
         }
+
+
+        // new: Prim's MST:
+
 
     }
 }

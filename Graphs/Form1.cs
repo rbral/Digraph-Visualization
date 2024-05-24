@@ -1,4 +1,4 @@
-﻿using SortedList;
+﻿//using SortedList;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -272,17 +272,44 @@ namespace Graphs
 
         private void kruskalsButton_Click(object sender, EventArgs e)
         {
-            List<Edge<String>> edgesToInclude = digraph.KruskalMSTEdges();
-            digraph = digraph.createDigraphFromEdges(digraph, edgesToInclude);
-            //Display(digraph);
+            /*List<Edge<String>> mstEdges = digraph.KruskalMSTEdges();
+            digraph = createDigraphFromEdgesHere(digraph, mstEdges);
+            Digraph<String> mstGraph = digraph.createDigraphFromEdges(digraph, mstEdges);
+            Display(mstGraph);*/
+
+            List<Edge<String>> mstEdges = digraph.KruskalMSTEdges();
+            Digraph<String> mstGraph = createDigraphFromEdgesHere(digraph, mstEdges);
+            Display(mstGraph);
 
             //List<Edge<String>> mstEdges = digraph.KruskalMST();
             //FormMST formMST = new FormMST(mstEdges, digraph);
             //formMST.Show();
         }
 
-        // new class for MST form: 
-        
+        private Digraph<String> createDigraphFromEdgesHere(Digraph<String> originalGraph, List<Edge<String>> edges)
+        {
+            Digraph<String> newGraph = new Digraph<String>();
+
+            // Add vertices to the new graph
+            foreach (var vertex in originalGraph.Vertices)
+            {
+                newGraph.AddVertex(new Vertex<String>(vertex.Info));
+            }
+
+            // Add edges to the new graph
+            foreach (var edge in edges)
+            {
+                var srcVertex = newGraph.Vertices.Find(v => v.Info == edge.Source.Info);
+                var tgtVertex = newGraph.Vertices.Find(v => v.Info == edge.Target.Info);
+                if (srcVertex != null && tgtVertex != null)
+                {
+                    srcVertex.AddNeighbor(tgtVertex, edge.Weight);
+                }
+            }
+
+            return newGraph;
+        }
+
 
 
 

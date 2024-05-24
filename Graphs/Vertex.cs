@@ -1,4 +1,4 @@
-﻿using SortedList;
+﻿//using SortedList;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -11,9 +11,9 @@ namespace Graphs
 {
     class Vertex<T> : IComparable<Vertex<T>> where T : IComparable<T>
     {
-        private T info;
+        public T info;
 
-        T Info { get; set; }
+        public T Info { get; set; }
         public Label Image { get; set; }
         public SortedList<Vertex<T>, double> Neighbors { get; } 
         // my addition:---------------
