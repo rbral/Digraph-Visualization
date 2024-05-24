@@ -265,9 +265,10 @@ namespace Graphs
         }
 
 
-        private void prillsButton_Click(object sender, EventArgs e)
+        private void primMSTButton_Click(object sender, EventArgs e)
         {
-
+            Digraph<String> mstGraph = digraph.createPrimMST_new(digraph);
+            Display(mstGraph);
         }
 
         private void kruskalsButton_Click(object sender, EventArgs e)
@@ -278,7 +279,7 @@ namespace Graphs
             Display(mstGraph);*/
 
             List<Edge<String>> mstEdges = digraph.KruskalMSTEdges();
-            Digraph<String> mstGraph = createDigraphFromEdgesHere(digraph, mstEdges);
+            Digraph<String> mstGraph = createKruskalMSTFromEdgesHere(digraph, mstEdges);
             Display(mstGraph);
 
             //List<Edge<String>> mstEdges = digraph.KruskalMST();
@@ -286,7 +287,7 @@ namespace Graphs
             //formMST.Show();
         }
 
-        private Digraph<String> createDigraphFromEdgesHere(Digraph<String> originalGraph, List<Edge<String>> edges)
+        private Digraph<String> createKruskalMSTFromEdgesHere(Digraph<String> originalGraph, List<Edge<String>> edges)
         {
             Digraph<String> newGraph = new Digraph<String>();
 

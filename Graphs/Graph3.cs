@@ -69,7 +69,7 @@ namespace Graphs
         }
 
 
-        public Digraph<T> createDigraphFromEdges(Digraph<T> originalDigraph, List<Edge<T>> edgesToIncludeList)
+        public Digraph<T> createKruskalMSTFromEdges(Digraph<T> originalDigraph, List<Edge<T>> edgesToIncludeList)
         {
             Digraph<T> newGraph = new Digraph<T>();
             Dictionary<Vertex<T>, Vertex<T>> vertexMap = new Dictionary<Vertex<T>, Vertex<T>>();
@@ -100,48 +100,6 @@ namespace Graphs
             return newGraph;
 
 
-            /*
-             so we have a list of edges to include in drawing of mst.
-            edges have: 
-                public Vertex<T> Source { get; }
-                public Vertex<T> Target { get; }
-                public double Weight { get; }
-            we need to make a digraph where there are the same vertices
-            but for each vertex, it will have less neighbors. 
-            the only neighbors it will have are those included in the edges list
-            a vertex has: 
-                Info = info;
-                Neighbors = new SortedList<Vertex<T>, double>();
-                InDegree = 0;
-                OutDegree = 0;
-            so here's how to do it:
-            make a copy of the digraph
-            loop through the edges TO EXCLUDE list
-                take source of curr edge
-                    find matching vertex to that src already in copydigraph
-                    loop through neighbors list of vertex (correcponding to target in edge)
-                    if find an edge that is          
-             */
-
-            /*Digraph<T> result = new Digraph<T>();
-            List<Vertex<T>> newVertices = result.Vertices;
-            //List<Vertex<T>> NewVertices = new List<Vertex<T>>();
-
-
-            Vertex<T> currSource;
-            Vertex<T> currTarget;
-            double currWeight;
-
-            foreach (Edge<T> currEdge in edgesToIncludeList)
-            {
-                currSource = currEdge.Source; 
-                currTarget = currEdge.Target;
-                currWeight = currEdge.Weight;
-                currSource.AddNeighbor(currTarget, currWeight);
-                newVertices.Add(currSource);                              
-            }
-
-            return result;*/
         }
 
         // new attempt chat gpt
@@ -353,7 +311,549 @@ namespace Graphs
 
 
         // new: Prim's MST:
+        public Digraph<T> createPrimMST_new(Digraph<T> originalDigraph)
+        {
+            var mst = new Digraph<T>();
+            int numV = originalDigraph.Vertices.Count;
+
+            if (numV == 0)
+                return mst;
+
+            var parent = new Dictionary<Vertex<T>, Vertex<T>>();
+            var key = new Dictionary<Vertex<T>, double>();
+            var inMST = new Dictionary<Vertex<T>, bool>();
+
+            // Initialize all keys as infinite and parent as null
+            foreach (var vertex in originalDigraph.Vertices)
+            {
+                key[vertex] = double.MaxValue;
+                parent[vertex] = null;
+                inMST[vertex] = false;
+            }
+
+            // Helper function to find the vertex with the minimum key value
+            Vertex<T> minKeyVertex()
+            {
+                double minValue = double.MaxValue;
+                Vertex<T> minVertex = null;
+
+                foreach (var vertex in key.Keys)
+                {
+                    if (!inMST[vertex] && key[vertex] < minValue)
+                    {
+                        minValue = key[vertex];
+                        minVertex = vertex;
+                    }
+                }
+                return minVertex;
+            }
+
+            // Start with the first vertex
+            key[originalDigraph.Vertices[0]] = 0;
+
+            // Process all vertices
+            for (int count = 0; count < numV; count++)
+            {
+                var u = minKeyVertex();
+                if (u == null)
+                    break;
+
+                inMST[u] = true;
+
+                // Update key value and parent for adjacent vertices of the picked vertex
+                foreach (var neighbor in u.Neighbors)
+                {
+                    var v = neighbor.Key;
+                    var weight = neighbor.Value;
+
+                    if (!inMST[v] && weight < key[v])
+                    {
+                        key[v] = weight;
+                        parent[v] = u;
+                    }
+                }
+
+                // Treat the graph as undirected by checking the reverse edges
+                foreach (var vertex in originalDigraph.Vertices)
+                {
+                    if (!vertex.Equals(u) && vertex.Neighbors.ContainsKey(u))
+                    {
+                        var weight = vertex.Neighbors[u];
+                        if (!inMST[vertex] && weight < key[vertex])
+                        {
+                            key[vertex] = weight;
+                            parent[vertex] = u;
+                        }
+                    }
+                }
+            }
+
+            // Add vertices to the MST
+            foreach (var vertex in originalDigraph.Vertices)
+            {
+                mst.AddVertex(new Vertex<T>(vertex.Info));
+            }
+
+            // Add edges to the MST
+            foreach (var vertex in originalDigraph.Vertices)
+            {
+                if (parent[vertex] != null) // meaning: this vertex has been connected to the MST through another vertex
+                {
+                    var srcVertex = mst.Vertices.Find(v => v.Info.CompareTo(parent[vertex].Info) == 0);
+                    var tgtVertex = mst.Vertices.Find(v => v.Info.CompareTo(vertex.Info) == 0);
+                    if (srcVertex != null && tgtVertex != null)
+                    {
+                        srcVertex.AddNeighbor(tgtVertex, key[vertex]);
+                        // Ensure to add both directions to treat the graph as undirected
+                        tgtVertex.AddNeighbor(srcVertex, key[vertex]);
+                    }
+                }
+            }
+
+            return mst;
+        }
 
 
+        /*        public Digraph<T> createPrimMST_new(Digraph<T> originalDigraph)
+                {
+                    var mst = new Digraph<T>();
+                    int numV = originalDigraph.Vertices.Count;
+
+                    if (numV == 0)
+                        return mst;
+
+                    var parent = new Dictionary<Vertex<T>, Vertex<T>>();
+                    var key = new Dictionary<Vertex<T>, double>();
+                    var inMST = new Dictionary<Vertex<T>, bool>();
+
+                    // Initialize all keys as infinite and parent as null
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        key[vertex] = double.MaxValue;
+                        parent[vertex] = null;
+                        inMST[vertex] = false;
+                    }
+
+                    // Helper function to find the vertex with the minimum key value
+                    Vertex<T> minKeyVertex()
+                    {
+                        double minValue = double.MaxValue;
+                        Vertex<T> minVertex = null;
+
+                        foreach (var vertex in key.Keys)
+                        {
+                            if (!inMST[vertex] && key[vertex] < minValue)
+                            {
+                                minValue = key[vertex];
+                                minVertex = vertex;
+                            }
+                        }
+                        return minVertex;
+                    }
+
+                    // Start with the first vertex
+                    key[originalDigraph.Vertices[0]] = 0;
+
+                    // Process all vertices
+                    for (int count = 0; count < numV; count++)
+                    {
+                        var u = minKeyVertex();
+                        if (u == null)
+                            break;
+
+                        inMST[u] = true;
+
+                        // Update key value and parent for adjacent vertices of the picked vertex
+                        foreach (var neighbor in u.Neighbors)
+                        {
+                            var v = neighbor.Key;
+                            var weight = neighbor.Value;
+
+                            if (!inMST[v] && weight < key[v])
+                            {
+                                key[v] = weight;
+                                parent[v] = u;
+                            }
+                        }
+                    }
+
+                    // Add vertices to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        mst.AddVertex(new Vertex<T>(vertex.Info));
+                    }
+
+                    // Add edges to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        if (parent[vertex] != null) // meaning: this vertex has been connected to the MST through another vertex
+                        {
+                            var srcVertex = mst.Vertices.Find(v => v.Info.CompareTo(parent[vertex].Info) == 0);
+                            var tgtVertex = mst.Vertices.Find(v => v.Info.CompareTo(vertex.Info) == 0);
+                            if (srcVertex != null && tgtVertex != null)
+                            {
+                                srcVertex.AddNeighbor(tgtVertex, key[vertex]);
+                            }
+                        }
+                    }
+
+                    return mst;
+                }
+        */
+
+        /*        public Digraph<T> createPrimMST_new(Digraph<T> originalDigraph)
+                {
+                    var mst = new Digraph<T>();
+                    int numV = originalDigraph.Vertices.Count;
+
+                    if (numV == 0)
+                        return mst;
+
+                    var parent = new Dictionary<Vertex<T>, Vertex<T>>();
+                    var key = new Dictionary<Vertex<T>, double>();
+                    var inMST = new Dictionary<Vertex<T>, bool>();
+
+                    // Initialize all keys as infinite and parent as null
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        key[vertex] = double.MaxValue;
+                        parent[vertex] = null;
+                        inMST[vertex] = false;
+                    }
+
+                    // Helper function to find the vertex with the minimum key value
+                    Vertex<T> minKeyVertex()
+                    {
+                        double minValue = double.MaxValue;
+                        Vertex<T> minVertex = null;
+
+                        foreach (var vertex in key.Keys)
+                        {
+                            if (!inMST[vertex] && key[vertex] < minValue)
+                            {
+                                minValue = key[vertex];
+                                minVertex = vertex;
+                            }
+                        }
+                        return minVertex;
+                    }
+
+                    // Handle disconnected graph by ensuring every vertex is eventually processed
+                    foreach (var startVertex in originalDigraph.Vertices)
+                    {
+                        if (!inMST[startVertex])
+                        {
+                            key[startVertex] = 0;
+
+                            for (int count = 0; count < numV; count++)
+                            {
+                                var u = minKeyVertex();
+                                if (u == null)
+                                    break;
+
+                                inMST[u] = true;
+
+                                // Update key value and parent for adjacent vertices of the picked vertex
+                                foreach (var neighbor in u.Neighbors)
+                                {
+                                    var v = neighbor.Key;
+                                    var weight = neighbor.Value;
+
+                                    if (!inMST[v] && weight < key[v])
+                                    {
+                                        key[v] = weight;
+                                        parent[v] = u;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Add vertices to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        mst.AddVertex(new Vertex<T>(vertex.Info));
+                    }
+
+                    // Add edges to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        if (parent[vertex] != null) // meaning: this vertex has been connected to the MST through another vertex
+                        {
+                            var srcVertex = mst.Vertices.Find(v => v.Info.CompareTo(parent[vertex].Info) == 0);
+                            var tgtVertex = mst.Vertices.Find(v => v.Info.CompareTo(vertex.Info) == 0);
+                            if (srcVertex != null && tgtVertex != null)
+                            {
+                                srcVertex.AddNeighbor(tgtVertex, key[vertex]);
+                            }
+                        }
+                    }
+
+                    return mst;
+                }
+        */
+
+        /*        public Digraph<T> createPrimMST_new(Digraph<T> originalDigraph)
+                {
+                    var mst = new Digraph<T>();
+                    int numV = originalDigraph.Vertices.Count;
+
+                    if (numV == 0)
+                        return mst;
+
+                    var parent = new Dictionary<Vertex<T>, Vertex<T>>();
+                    var key = new Dictionary<Vertex<T>, double>();
+                    var inMST = new Dictionary<Vertex<T>, bool>();
+
+                    // Initialize all keys as infinite and parent as null
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        key[vertex] = double.MaxValue;
+                        parent[vertex] = null;
+                        inMST[vertex] = false;
+                    }
+
+                    // Helper function to find the vertex with the minimum key value
+                    Vertex<T> minKeyVertex()
+                    {
+                        double minValue = double.MaxValue;
+                        Vertex<T> minVertex = null;
+
+                        foreach (var vertex in key.Keys)
+                        {
+                            if (!inMST[vertex] && key[vertex] < minValue)
+                            {
+                                minValue = key[vertex];
+                                minVertex = vertex;
+                            }
+                        }
+                        return minVertex;
+                    }
+
+                    // Process each component separately to handle disconnected graphs
+                    foreach (var startVertex in originalDigraph.Vertices)
+                    {
+                        if (!inMST[startVertex])
+                        {
+                            key[startVertex] = 0;
+
+                            for (int count = 0; count < numV; count++)
+                            {
+                                var u = minKeyVertex();
+                                if (u == null)
+                                    break;
+
+                                inMST[u] = true;
+
+                                // Update key value and parent for adjacent vertices of the picked vertex
+                                foreach (var neighbor in u.Neighbors)
+                                {
+                                    var v = neighbor.Key;
+                                    var weight = neighbor.Value;
+
+                                    if (!inMST[v] && weight < key[v])
+                                    {
+                                        key[v] = weight;
+                                        parent[v] = u;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Add vertices to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        mst.AddVertex(new Vertex<T>(vertex.Info));
+                    }
+
+                    // Add edges to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        if (parent[vertex] != null)
+                        {
+                            var srcVertex = mst.Vertices.Find(v => v.Info.CompareTo(parent[vertex].Info) == 0);
+                            var tgtVertex = mst.Vertices.Find(v => v.Info.CompareTo(vertex.Info) == 0);
+                            if (srcVertex != null && tgtVertex != null)
+                            {
+                                srcVertex.AddNeighbor(tgtVertex, key[vertex]);
+                            }
+                        }
+                    }
+
+                    return mst;
+                }
+        */
+
+
+        /*        public Digraph<T> createPrimMST_new(Digraph<T> originalDigraph)
+                {
+                    int numV = originalDigraph.Vertices.Count;
+
+                    // A utility function to find
+                    // the vertex with minimum key
+                    // value, from the set of vertices
+                    // not yet included in MST
+                    int minKey(int[] key, bool[] mstSet)
+                    {
+                        // Initialize min value
+                        int min = int.MaxValue, min_index = -1;
+
+                        for (int v = 0; v < numV; v++)
+                            if (mstSet[v] == false && key[v] < min)
+                            {
+                                min = key[v];
+                                min_index = v;
+                            }
+
+                        return min_index;
+                    }
+
+
+                    // Array to store constructed MST
+                    int[] parent = new int[numV];
+
+                    // Key values used to pick
+                    // minimum weight edge in cut
+                    int[] key = new int[numV];
+
+                    // To represent set of vertices
+                    // included in MST
+                    bool[] mstSet = new bool[numV];
+
+                    // Initialize all keys
+                    // as INFINITE
+                    for (int i = 0; i < numV; i++)
+                    {
+                        key[i] = int.MaxValue;
+                        mstSet[i] = false;
+                    }
+
+                    // Always include first 1st vertex in MST.
+                    // Make key 0 so that this vertex is
+                    // picked as first vertex
+                    // First node is always root of MST
+                    key[0] = 0;
+                    parent[0] = -1;
+
+                    // The MST will have V vertices
+                    for (int count = 0; count < numV - 1; count++)
+                    {
+
+                        // Pick the minimum key vertex
+                        // from the set of vertices
+                        // not yet included in MST
+                        int u = minKey(key, mstSet);
+
+                        // Add the picked vertex
+                        // to the MST Set
+                        mstSet[u] = true;
+
+                        // Update key value and parent
+                        // index of the adjacent vertices
+                        // of the picked vertex. Consider
+                        // only those vertices which are
+                        // not yet included in MST
+                        for (int v = 0; v < numV; v++)
+
+                            // graph[u][v] is non zero only
+                            // for adjacent vertices of m
+                            // mstSet[v] is false for vertices
+                            // not yet included in MST Update
+                            // the key only if graph[u][v] is
+                            // smaller than key[v]
+                            if (graph[u, v] != 0 && mstSet[v] == false
+                                && graph[u, v] < key[v])
+                            {
+                                parent[v] = u;
+                                key[v] = graph[u, v];
+                            }
+                    }
+
+
+
+                    return null;
+                }
+        */
+        //old attempt:
+        /*            public Digraph<T> createPrimMST_old(Digraph<T> originalDigraph)
+                {
+                    var mst = new Digraph<T>();
+                    var verticesCount = originalDigraph.Vertices.Count;
+
+                    if (verticesCount == 0)
+                        return mst;
+
+                    var parent = new Dictionary<Vertex<T>, Vertex<T>>();
+                    var key = new Dictionary<Vertex<T>, double>();
+                    var inMST = new Dictionary<Vertex<T>, bool>();
+                    var vertexQueue = new SortedSet<Vertex<T>>(Comparer<Vertex<T>>.Create((v1, v2) => key[v1].CompareTo(key[v2])));
+
+                    // Initialize all keys as infinite and parent as null
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        key[vertex] = double.MaxValue;
+                        parent[vertex] = null;
+                        inMST[vertex] = false;
+                    }
+
+                    // Handle disconnected graph by ensuring every vertex is eventually processed
+                    foreach (var startVertex in originalDigraph.Vertices)
+                    {
+                        if (!inMST[startVertex])
+                        {
+                            key[startVertex] = 0;
+                            vertexQueue.Add(startVertex);
+
+                            while (vertexQueue.Count > 0)
+                            {
+                                var u = vertexQueue.First();
+                                vertexQueue.Remove(u);
+                                inMST[u] = true;
+
+                                // Update key value and parent index of the adjacent vertices of the picked vertex
+                                foreach (var neighbor in u.Neighbors)
+                                {
+                                    var v = neighbor.Key;
+                                    var weight = neighbor.Value;
+
+                                    if (!inMST[v] && key[v] > weight)
+                                    {
+                                        if (vertexQueue.Contains(v))
+                                        {
+                                            vertexQueue.Remove(v);
+                                        }
+                                        key[v] = weight;
+                                        parent[v] = u;
+                                        vertexQueue.Add(v);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Add vertices to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        mst.AddVertex(new Vertex<T>(vertex.Info));
+                    }
+
+                    // Add edges to the MST
+                    foreach (var vertex in originalDigraph.Vertices)
+                    {
+                        if (parent[vertex] != null)
+                        {
+                            var srcVertex = mst.Vertices.Find(v => v.Info.CompareTo(parent[vertex].Info) == 0);
+                            var tgtVertex = mst.Vertices.Find(v => v.Info.CompareTo(vertex.Info) == 0);
+                            if (srcVertex != null && tgtVertex != null)
+                            {
+                                srcVertex.AddNeighbor(tgtVertex, key[vertex]);
+                            }
+                        }
+                    }
+
+                    return mst;
+                }
+        */
     }
 }

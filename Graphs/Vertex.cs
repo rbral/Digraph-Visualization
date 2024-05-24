@@ -16,9 +16,7 @@ namespace Graphs
         public T Info { get; set; }
         public Label Image { get; set; }
         public SortedList<Vertex<T>, double> Neighbors { get; } 
-        // my addition:---------------
-        //public List<Edge<T>> Edges { get; }
-        //----------------------------
+        
         int InDegree { get; set; }
         int OutDegree { get; set; }
 
@@ -34,18 +32,7 @@ namespace Graphs
 
         public override String ToString() => Info.ToString();
 
-        //public  int CompareTo(Vertex<T> other)
-        //{
-        //    String thisStr = Info.ToString();
-        //    String otheStr = other.Info.ToString();
-        //    return thisStr.CompareTo(otheStr);
-        //    //return this.Info.CompareTo(other.Info);
-        //}
-        //public int CompareTo([AllowNull] Vertex<T> other)
-        //{
-        //    return this.Info.CompareTo(other.Info);
-        //}
-
+        
         public override bool Equals(object obj)
         {
             bool isEqual = false;

@@ -38,7 +38,6 @@
             this.button1 = new System.Windows.Forms.Button();
             this.panelGraph = new System.Windows.Forms.Panel();
             this.topSortButton = new System.Windows.Forms.Button();
-            this.dijkstraButton = new System.Windows.Forms.Button();
             this.prillsButton = new System.Windows.Forms.Button();
             this.kruskalsButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
@@ -88,7 +87,7 @@
             this.tbServer.Name = "tbServer";
             this.tbServer.Size = new System.Drawing.Size(516, 44);
             this.tbServer.TabIndex = 3;
-            this.tbServer.Text = "ML-RefVm-231318\\SQLEXPRESS";
+            this.tbServer.Text = "RIVKALAPTOP\\SQLEXPRESS01";
             // 
             // label3
             // 
@@ -152,29 +151,19 @@
             this.topSortButton.UseVisualStyleBackColor = true;
             this.topSortButton.Click += new System.EventHandler(this.topSortButton_Click);
             // 
-            // dijkstraButton
-            // 
-            this.dijkstraButton.Location = new System.Drawing.Point(989, 438);
-            this.dijkstraButton.Name = "dijkstraButton";
-            this.dijkstraButton.Size = new System.Drawing.Size(151, 103);
-            this.dijkstraButton.TabIndex = 4;
-            this.dijkstraButton.Text = "Dijkstra Shortest Path";
-            this.dijkstraButton.UseVisualStyleBackColor = true;
-            this.dijkstraButton.Click += new System.EventHandler(this.dijkstraButton_Click);
-            // 
             // prillsButton
             // 
-            this.prillsButton.Location = new System.Drawing.Point(989, 600);
+            this.prillsButton.Location = new System.Drawing.Point(989, 699);
             this.prillsButton.Name = "prillsButton";
             this.prillsButton.Size = new System.Drawing.Size(151, 97);
             this.prillsButton.TabIndex = 5;
-            this.prillsButton.Text = "Prill\'s MST";
+            this.prillsButton.Text = "Prim\'s MST";
             this.prillsButton.UseVisualStyleBackColor = true;
-            this.prillsButton.Click += new System.EventHandler(this.prillsButton_Click);
+            this.prillsButton.Click += new System.EventHandler(this.primMSTButton_Click);
             // 
             // kruskalsButton
             // 
-            this.kruskalsButton.Location = new System.Drawing.Point(989, 753);
+            this.kruskalsButton.Location = new System.Drawing.Point(989, 845);
             this.kruskalsButton.Name = "kruskalsButton";
             this.kruskalsButton.Size = new System.Drawing.Size(151, 97);
             this.kruskalsButton.TabIndex = 6;
@@ -186,10 +175,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1227, 1321);
             this.Controls.Add(this.kruskalsButton);
             this.Controls.Add(this.prillsButton);
-            this.Controls.Add(this.dijkstraButton);
             this.Controls.Add(this.topSortButton);
             this.Controls.Add(this.panelGraph);
             this.Controls.Add(this.button1);
@@ -215,7 +204,6 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Panel panelGraph;
         private System.Windows.Forms.Button topSortButton;
-        private System.Windows.Forms.Button dijkstraButton;
         private System.Windows.Forms.Button prillsButton;
         private System.Windows.Forms.Button kruskalsButton;
     }
