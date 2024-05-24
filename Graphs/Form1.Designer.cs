@@ -159,7 +159,7 @@
             this.prillsButton.TabIndex = 5;
             this.prillsButton.Text = "Prim\'s MST";
             this.prillsButton.UseVisualStyleBackColor = true;
-            this.prillsButton.Click += new System.EventHandler(this.primMSTButton_Click);
+            this.prillsButton.Click += new System.EventHandler(this.primsMSTButton_Click);
             // 
             // kruskalsButton
             // 
@@ -169,7 +169,7 @@
             this.kruskalsButton.TabIndex = 6;
             this.kruskalsButton.Text = "Kruskal\'s MST";
             this.kruskalsButton.UseVisualStyleBackColor = true;
-            this.kruskalsButton.Click += new System.EventHandler(this.kruskalsButton_Click);
+            this.kruskalsButton.Click += new System.EventHandler(this.kruskalsMSTButton_Click);
             // 
             // Form1
             // 

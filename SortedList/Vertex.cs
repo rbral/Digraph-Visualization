@@ -47,19 +47,5 @@ namespace SortedList
         {
             return this.Info.CompareTo(other.Info);
         }
-
-        /*public double getWeightBetEachNeighbor(Vertex<T> neighbor)
-        {
-            if (Neighbors.ContainsKey(neighbor))
-            {
-                // Return the weight of the edge between the current vertex and the neighbor
-                return Neighbors[neighbor];
-            }
-            else
-            {
-                // If the neighbor doesn't exist, return a default value (e.g., -1) or throw an exception
-                throw new ArgumentException("Neighbor vertex not found.");
-            }
-        }*/
     }
 }

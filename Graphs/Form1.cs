@@ -259,32 +259,22 @@ namespace Graphs
 
         }
 
-        private void dijkstraButton_Click(object sender, EventArgs e)
-        {
-
-        }
+        
 
 
-        private void primMSTButton_Click(object sender, EventArgs e)
+        private void primsMSTButton_Click(object sender, EventArgs e)
         {
             Digraph<String> mstGraph = digraph.createPrimMST_new(digraph);
             Display(mstGraph);
         }
 
-        private void kruskalsButton_Click(object sender, EventArgs e)
+        private void kruskalsMSTButton_Click(object sender, EventArgs e)
         {
-            /*List<Edge<String>> mstEdges = digraph.KruskalMSTEdges();
-            digraph = createDigraphFromEdgesHere(digraph, mstEdges);
-            Digraph<String> mstGraph = digraph.createDigraphFromEdges(digraph, mstEdges);
-            Display(mstGraph);*/
-
             List<Edge<String>> mstEdges = digraph.KruskalMSTEdges();
             Digraph<String> mstGraph = createKruskalMSTFromEdgesHere(digraph, mstEdges);
             Display(mstGraph);
 
-            //List<Edge<String>> mstEdges = digraph.KruskalMST();
-            //FormMST formMST = new FormMST(mstEdges, digraph);
-            //formMST.Show();
+            
         }
 
         private Digraph<String> createKruskalMSTFromEdgesHere(Digraph<String> originalGraph, List<Edge<String>> edges)
